@@ -14,6 +14,8 @@
 
 # production
 /build
+# don't feel like making a separate dir for compiled typescript, so in public it shall stay.
+/public/*.js
 
 # misc
 .DS_Store
@@ -23,7 +25,6 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-.pnpm-debug.log*
 
 # local env files
 .env.local

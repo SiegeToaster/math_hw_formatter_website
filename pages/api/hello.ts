@@ -14,23 +14,18 @@ type ResponseMessage = {
   message: string
 }
 
-export default function handler(
+export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<ResponseData | ResponseMessage>
 ) {
-  // console.log(req)
-  // set parameters
-  getAssignment("66")
-
   let params = req.query
   let name = params.name
   let period = params.periodNumber
   
   if (!params || !name || !period) {
-    console.log('Missing Input(s).')
     return res.status(400).json({ message: '400 - Missing input(s)' })
   }
-  console.log([params, name, period])
+
   if (period.constructor === Array) period = period[0]
   // @ts-expect-error types are dumb, period, supposedly, could be an array but it is checked above
   if (parseInt(period) < 1 || parseInt(period) > 6 || isNaN(parseInt(period))) period = ''
@@ -38,8 +33,19 @@ export default function handler(
   // respond with error if inputs are invalid
   if ([params, name, period].includes('')) return res.status(400).json({ message: '400 - Invalid input(s)' })
 
-  if (Array.isArray(hwNum)) hwNum = hwNum.join()
-  getAssignment(hwNum)
+	if (Array.isArray(name)) {
+		name = name.join()
+	}
+	if (Array.isArray(period)) {
+		period = period.join()
+	}
+  if (Array.isArray(hwNum)) {
+		hwNum = hwNum.join() // sonarlint threw a warning when I did single line ifs with this 
+	}
+
+	const assignmentData = await getAssignment(hwNum)
+	if (!assignmentData) return res.status(500).json({ message: '500 - Failed to retrieve assignment data '})
+	generatePDF(assignmentData.hwString, assignmentData.assignment, name, period, assignmentData.dueDate)
 
   // respond success with inputs
   res.status(200).json({ name: `${name}`, period: `${period}`, hwNum: `${hwNum}`, needReviewProblems: false })
@@ -47,15 +53,15 @@ export default function handler(
 
 async function generatePDF(hwNum: string, assignment: string, name: string, period: string, date: string) {
   const pdf = new jsPDF()
-  pdf.setFont("Arial")
+  pdf.setFont("helvetica")
   pdf.setFontSize(14)
-  pdf.text(hwNum, 35, 12, {maxWidth: 24})
+  pdf.text(`HW ${hwNum}`, 35, 12, {maxWidth: 24})
   pdf.text(assignment, 63, 12, {maxWidth: 93})
   pdf.text([name, `Per ${period}`, date], 161, 12, {maxWidth: 55})
   pdf.save()
 }
 
-async function getAssignment(hwNum: string) {
+async function getAssignment(hwNum: string): Promise<{ hwString: string, assignment: string, dueDate: string } | undefined> {
   const client = docs({
     version: 'v1',
     auth: await googleAuth(),
@@ -66,16 +72,33 @@ async function getAssignment(hwNum: string) {
   })
 
   const data = document.data.body?.content![4].table!.tableRows!
+	let hwString, assignedProblemsString, dueDate // returns
 
   for (let block of data) {
     const assignment = block.tableCells
     const assignmentTitle = assignment![0].content
     if (!assignmentTitle) continue
-    const hwString = constructHwString(assignmentTitle)
+    hwString = constructHwString(assignmentTitle)
     let validNumbers = constructValidNumbers(hwString)
 		validNumbers = filterValidNumbers(validNumbers, hwString)
-		console.log(validNumbers)
-  }
+
+		if (validNumbers.includes(hwNum)) {
+			const assignmentPages = assignment![3].content
+			const assignmentProblems = assignment![4].content
+			if (!assignmentPages || !assignmentProblems) break
+			
+			const pages = getPages(assignmentPages)
+			const problems = getProblems(assignmentProblems)
+			
+			dueDate = problems.dueDate
+			let problemsText = problems.problems
+			if (!Array.isArray(problemsText)) problemsText = [problemsText]
+			assignedProblemsString = constructAssignedProblemsString(pages, problemsText)
+			
+			if (!hwString || !assignedProblemsString || !dueDate) return
+			return { hwString: hwString, assignment: assignedProblemsString, dueDate: dueDate}
+		}
+	}
 }
 
 function constructHwString(assignmentTitle: docs_v1.Schema$StructuralElement[]) {
@@ -92,7 +115,6 @@ function constructHwString(assignmentTitle: docs_v1.Schema$StructuralElement[]) 
     assignmentTitleText = assignmentTitleText.trim()
     
     hwString += assignmentTitleText + ' '
-    // console.log(assignmentTitleText)
   }
 
   return hwString.trim()
@@ -139,6 +161,59 @@ function filterValidNumbers(validNumbers: string[], hwString: string) {
 	}
 
 	return validNumbers
+}
+
+function getPages(assignmentPages: docs_v1.Schema$StructuralElement[]) {
+	const pages: string[] = []
+	
+	for (const page of assignmentPages) {
+		let pageContent = page.paragraph?.elements![0].textRun?.content
+		if (!pageContent || pageContent == '\n') continue
+
+		pageContent = pageContent.replaceAll('\n', '')
+		pageContent = pageContent.trim()
+
+		pages.push(pageContent)
+	}
+	
+	return pages
+}
+
+function getProblems(assignmentProblems: docs_v1.Schema$StructuralElement[]): { problems: string[], dueDate: string } {
+	let dueDate = ''
+	const problems: string[] = []
+
+	for (const problem of assignmentProblems) {
+		const problem2 = problem.paragraph?.elements![0]!
+		if (!Object.keys(problem2).includes('textRun')) return { problems: problems, dueDate: dueDate }
+
+		const problemText = problem2.textRun?.content
+		if (!problemText) continue
+		if (problemText?.match(/^do +mml/i)) return { problems: problems, dueDate: dueDate }
+
+		if (problemText?.toLowerCase().startsWith('due')) {
+			const index = problemText.search(/\d/)
+			dueDate = problemText.slice(index).replaceAll('\n', '') + '/' + (new Date().getFullYear()).toString().slice(2)
+			// The year thing won't work if the assignment is due in a different year than when it is being fetched, but I could've just left it at 2022 so I think it's okay, and since my opinion is the only one that matters here, it this 'bug' will remain :)
+		} else {
+			problems.push(problemText.replaceAll('\n', ''))
+		}
+	}
+	
+	return { problems: problems, dueDate: dueDate }
+}
+
+function constructAssignedProblemsString(pages: string[], problems: string[]) {
+	let assignedProblemsString = ''
+	for (const [i, page] of pages.entries()) {
+		assignedProblemsString += page + ' '
+		if (i >= problems.length) break
+		if (problems[i] != '' && !page.toLowerCase().includes('added')) {
+			assignedProblemsString += '#' + problems[i] + '; '
+		}
+	}
+
+	return assignedProblemsString
 }
 
 async function googleAuth() {

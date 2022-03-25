@@ -19,17 +19,18 @@ export default async function handler(
   let params = req.query
   let name = params.name
   let period = params.periodNumber
-  
-  if (!params || !name || !period) {
+	let hwNum = params.hwNumber
+  let pages = params.pages
+
+  if (!params || !name || !period || !pages || !hwNum) {
     return res.status(400).json({ message: '400 - Missing input(s)' })
   }
 
   if (period.constructor === Array) period = period[0]
   // @ts-expect-error types are dumb, period, supposedly, could be an array but it is checked above
   if (parseInt(period) < 1 || parseInt(period) > 6 || isNaN(parseInt(period))) period = ''
-  let hwNum = params.hwNumber
   // respond with error if inputs are invalid
-  if ([params, name, period].includes('')) return res.status(400).json({ message: '400 - Invalid input(s)' })
+  if ([params, name, period, pages].includes('')) return res.status(400).json({ message: '400 - Invalid input(s)' })
 
 	if (Array.isArray(name)) {
 		name = name.join()
@@ -38,24 +39,35 @@ export default async function handler(
 		period = period.join()
 	}
   if (Array.isArray(hwNum)) {
-		hwNum = hwNum.join() // sonarlint threw a warning when I did single line ifs with this 
+		hwNum = hwNum.join()
+	}
+	if (Array.isArray(pages)) {
+		pages = pages.join() // sonarlint threw a warning when I did single line ifs with this 
 	}
 
 	const assignmentData = await getAssignment(hwNum)
 	if (!assignmentData) return res.status(500).json({ message: '500 - Failed to retrieve assignment data '})
-	const pdf = await generatePDF(assignmentData.hwString, assignmentData.assignment, name, period, assignmentData.dueDate)
+	const pdf = await generatePDF(assignmentData.hwString, assignmentData.assignment, name, period, assignmentData.dueDate, parseInt(pages))
   // respond success with inputs
-  res.status(200).json({ pdf: pdf, needReviewProblems: false })
+  res.status(200).json({ pdf: pdf, needReviewProblems: false }) // ToDo: check for review problems
 	console.log('done')
 }
 
-async function generatePDF(hwNum: string, assignment: string, name: string, period: string, date: string) {
+async function generatePDF(hwNum: string, assignment: string, name: string, period: string, date: string, numberOfPages: number) { // ! maximum 10 pages
   const pdf = new jsPDF()
   pdf.setFont("helvetica")
   pdf.setFontSize(14)
-  pdf.text(`HW ${hwNum}`, 35, 12, {maxWidth: 24})
-  pdf.text(assignment, 63, 12, {maxWidth: 93})
-  pdf.text([name, `Per ${period}`, date], 161, 12, {maxWidth: 55})
+
+	pdf.text(`HW ${hwNum}`, 35, 12, {maxWidth: 24})
+	pdf.text(assignment, 63, 12, {maxWidth: 93})
+	pdf.text([name, `Per ${period}`, date], 161, 12, {maxWidth: 55})
+
+	for (let i = 1; i < numberOfPages; i++) {
+		pdf.addPage() // i *think* addPage has to be at the beginning of the loop, hence the duplicate code above
+		pdf.text(`HW ${hwNum}`, 35, 12, {maxWidth: 24})
+		pdf.text(assignment, 63, 12, {maxWidth: 93})
+		pdf.text([name, `Per ${period}`, date], 161, 12, {maxWidth: 55})
+	}
   return pdf.output('dataurlstring', {filename: `HW${hwNum}`})
 }
 

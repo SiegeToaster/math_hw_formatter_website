@@ -29,6 +29,9 @@ const Home: NextPage = () => {
             <label>HW Number: </label>
             <input type="text" id="hwNumber" name="hwNumber"></input>
             <br></br>
+						<label>Number of Pages: </label>
+            <input type="text" id="pages" name="pages"></input>
+            <br></br>
             <input type="submit" value="Submit"></input>
           </form>
         </div>

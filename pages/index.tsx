@@ -18,7 +18,6 @@ const Home: NextPage = () => {
             href='https://www.simplyrecipes.com/recipes/joes_special_scrambled_eggs_with_spinach_beef_and_mushrooms/'
             target="_blank"
             rel="noopener noreferrer"
-            className={styles.plaintextLink}
           >
             Joe&apos;s FANTASTICALLY Stpuid Homework Formatting THing
           </a>
@@ -29,14 +28,9 @@ const Home: NextPage = () => {
         </p>
 
         <div className={styles.grid}>
-          <a href="./test1" className={styles.card}>
+          <a href="./formInput" className={styles.card}>
             <h2>Test 1 &rarr;</h2>
             <p>Test 1 things</p>
-          </a>
-
-          <a href="./test2" className={styles.card}>
-            <h2>Test 2 &rarr;</h2>
-            <p>Test 2 things</p>
           </a>
         </div>
       </main>

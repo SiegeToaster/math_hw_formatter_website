@@ -113,6 +113,22 @@
 	border: none;
 }
 
+.authors {
+  position: absolute;
+	bottom: 1%;
+  right: 1%;
+  width: 10%;
+  text-align: right;
+}
+
+.link {
+  color: blue;
+}
+.link:hover {
+  text-decoration: underline;
+}
+
+
 @media (max-width: 600px) {
   .grid {
     width: 100%;

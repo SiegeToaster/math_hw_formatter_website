@@ -49,7 +49,7 @@ export default async function handler(
   if (!assignmentData) return res.status(500).json({ message: '500 - Failed to retrieve assignment data '})
   const pdf = await generatePDF(assignmentData.hwString, assignmentData.assignment, name, period, assignmentData.dueDate, parseInt(pages))
   // respond success with inputs
-  res.status(200).json({ pdf: pdf, needReviewProblems: false }) // ToDo: check for review problems
+  res.status(200).json({ pdf: pdf, needReviewProblems: true }) // ToDo: check for review problems
   console.log('done')
 }
 
@@ -229,6 +229,9 @@ function constructAssignedProblemsString(pages: string[], problems: string[]) {
   return assignedProblemsString
 }
 
+/**
+ * This authentication method was created by William Hayr
+ */
 async function googleAuth() {
   const GOOGLE_PRIVATE_KEY = process.env.GOOGLE_PRIVATE_KEY!
   const GOOGLE_CLIENT_EMAIL = process.env.GOOGLE_CLIENT_EMAIL!

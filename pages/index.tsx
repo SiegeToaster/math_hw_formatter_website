@@ -33,6 +33,18 @@ const Home: NextPage = () => {
             <p>Joe? Who&apos;s Joe?</p>
           </a>
         </div>
+
+        <div className={styles.grid}>
+          <a href="./instructions" className={styles.card}>
+            <h2>Instructions &rarr;</h2>
+            <p>Read Me</p>
+          </a>
+        </div>
+
+				<p className={styles.authors}>
+          Created by:<br></br>William Armstrong and William Hayr
+        </p>
+
       </main>
 
       <footer className={styles.footer}>

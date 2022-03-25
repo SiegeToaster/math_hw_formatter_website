@@ -29,8 +29,8 @@ const Home: NextPage = () => {
 
         <div className={styles.grid}>
           <a href="./formInput" className={styles.card}>
-            <h2>Test 1 &rarr;</h2>
-            <p>Test 1 things</p>
+            <h2>Start &rarr;</h2>
+            <p>Joe? Who&apos;s Joe?</p>
           </a>
         </div>
       </main>
@@ -48,7 +48,7 @@ const Home: NextPage = () => {
         </a>
 
 				<a
-					href="https://github.com/SiegeToaster/webMathHWFormatter"
+					href="https://github.com/SiegeToaster/math_hw_formatter_website"
 					target="_blank"
 					rel="noopener noreferrer"
 				>

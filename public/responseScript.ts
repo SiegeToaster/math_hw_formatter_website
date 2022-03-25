@@ -1,5 +1,5 @@
 // compile with:
-//tsc public/responseScript.ts
+// tsc public/responseScript.ts
 // or if that doesn't work
 // npx tsc public/responseScript.ts
 
@@ -27,22 +27,28 @@ testFunc()
 export {}
 
 async function testFunc() {
-	const response = await fetch(`./api/hello?name=${params[0]}&periodNumber=${params[1]}&hwNumber=${params[2]}`).then(res => {
-		return res.json()
-	})
-	console.log(response)
+  const response = await fetch(`./api/hello?name=${params[0]}&periodNumber=${params[1]}&hwNumber=${params[2]}`).then(res => {
+    return res.json()
+  })
+  console.log(response)
 
-	if (response.message) {
-		console.log(response.message)
-		updateText(`Error: ${response.message}`)
-	} else {
-		console.log(response)
-	}
+  if (response.message) {
+    console.log(response.message)
+    updateText(`Error: ${response.message}`)
+  } else {
+    if (response.needReviewProblems) {
+      updateText('Review problems needed.<br></br>I would tell you what topics you need here, but that would take more effort than I am currently willing to put in.')
+      const button = document.getElementById("okayButton");
+      if (button) button.style.display = "block";
+    } else {
+      // ToDo: go to pdf page
+    }
+  }
 
-	// updateText(response);
+  // updateText(response);
 }
 
 async function updateText(updatedText: string) {
-	const testThing = document.getElementById("testThing")
-	if (testThing) testThing.innerHTML = updatedText
+  const testThing = document.getElementById("testThing")
+  if (testThing) testThing.innerHTML = updatedText
 }

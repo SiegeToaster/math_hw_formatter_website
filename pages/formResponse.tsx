@@ -7,25 +7,23 @@ const Home: NextPage = () => {
   return (
     <div className={styles.container}>
       <Head>
-        <title>Test 2</title>
+        <title>IDK What I&apos;m Doing</title>
         <meta name="description" content="http://localhost:3000/" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
       <main className={styles.main}>
         <h1 className={styles.title}>
-          Test 2
+          A Very Interesting Title To This Loading Page
         </h1>
-
-        <p className={styles.description}>
-          It will be a miracle if this works.
-        </p>
 
         <div className={styles.grid}>
           <Script id='tempFix' >{`var exports = {};`}</Script> {/* ToDo: Find a not stupid fix */}
           <Script src="/responseScript.js" />
-          <p id="testThing">Please Wait...</p>
+          <p id="testThing" className={styles.description}>Please Wait...</p>
         </div>
+
+        <button id="okayButton" className={styles.hiddenButton} >Okay.</button>
       </main>
     </div>
   )

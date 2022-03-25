@@ -6,19 +6,17 @@ const Home: NextPage = () => {
   return (
     <div className={styles.container}>
       <Head>
-        <title>Test 1</title>
+        <title>IDK What I&apos;m Doing</title>
         <meta name="description" content="http://localhost:3000/" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
       <main className={styles.main}>
         <h1 className={styles.title}>
-          Test 1
+          Input
         </h1>
 
-        <p className={styles.description}>
-          It will be a miracle if this works.
-        </p>
+       <br></br><br></br>
 
         <div className={styles.grid}>
           <form action='./formResponse'>

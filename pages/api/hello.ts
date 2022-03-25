@@ -4,9 +4,7 @@ import { auth, docs, docs_v1 } from '@googleapis/docs'
 import { jsPDF } from 'jspdf'
 
 type ResponseData = {
-  name: string
-  period: string
-  hwNum: string
+  pdf: string
   needReviewProblems: boolean
 }
 
@@ -45,10 +43,10 @@ export default async function handler(
 
 	const assignmentData = await getAssignment(hwNum)
 	if (!assignmentData) return res.status(500).json({ message: '500 - Failed to retrieve assignment data '})
-	generatePDF(assignmentData.hwString, assignmentData.assignment, name, period, assignmentData.dueDate)
-
+	const pdf = await generatePDF(assignmentData.hwString, assignmentData.assignment, name, period, assignmentData.dueDate)
   // respond success with inputs
-  res.status(200).json({ name: `${name}`, period: `${period}`, hwNum: `${hwNum}`, needReviewProblems: false })
+  res.status(200).json({ pdf: pdf, needReviewProblems: false })
+	console.log('done')
 }
 
 async function generatePDF(hwNum: string, assignment: string, name: string, period: string, date: string) {
@@ -58,7 +56,7 @@ async function generatePDF(hwNum: string, assignment: string, name: string, peri
   pdf.text(`HW ${hwNum}`, 35, 12, {maxWidth: 24})
   pdf.text(assignment, 63, 12, {maxWidth: 93})
   pdf.text([name, `Per ${period}`, date], 161, 12, {maxWidth: 55})
-  pdf.save()
+  return pdf.output('dataurlstring', {filename: `HW${hwNum}`})
 }
 
 async function getAssignment(hwNum: string): Promise<{ hwString: string, assignment: string, dueDate: string } | undefined> {

@@ -2,7 +2,6 @@
 // tsc public/responseScript.ts
 // or if that doesn't work
 // npx tsc public/responseScript.ts
-
 const urlParams = new URLSearchParams(window.location.search)
 
 /**
@@ -22,11 +21,11 @@ params[2] = urlParams.get("hwNumber")
 
 console.log(params)
 
-testFunc()
+response()
 
 export {}
 
-async function testFunc() {
+async function response() {
   const response = await fetch(`./api/hello?name=${params[0]}&periodNumber=${params[1]}&hwNumber=${params[2]}`).then(res => {
     return res.json()
   })
@@ -36,15 +35,23 @@ async function testFunc() {
     console.log(response.message)
     updateText(`Error: ${response.message}`)
   } else {
+    const pdf: string = response.pdf
+    const para = new URLSearchParams()
+    para.append("pdfString", pdf)
+
     if (response.needReviewProblems) {
       updateText('Review problems needed.<br></br>I would tell you what topics you need here, but that would take more effort than I am currently willing to put in.')
       const button = document.getElementById("okayButton");
-      if (button) button.style.display = "block";
+      if (button) {
+        button.style.display = "block";
+        button.onclick = () => {
+          window.location.href = "./displayPDF?" + para.toString()
+        }
+      }
     } else {
-      // ToDo: go to pdf page
+      window.location.href = "./displayPDF?" + para.toString()
     }
   }
-
   // updateText(response);
 }
 

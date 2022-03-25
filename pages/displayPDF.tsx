@@ -12,9 +12,9 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-			<Script id='tempFix' >{`var exports = {};`}</Script> {/* ToDo: Find a not stupid fix */}
-			<Script src="/displayPDF.js" />
-			<iframe id="pdfViewer" className={styles.displayPDF} src=""></iframe>
+      <Script id='tempFix' >{`var exports = {};`}</Script> {/* ToDo: Find a not stupid fix */}
+      <Script src="/displayPDF.js" />
+      <iframe id="pdfViewer" className={styles.displayPDF} src=""></iframe>
     </div>
   )
 }

@@ -47,16 +47,16 @@ const Home: NextPage = () => {
           </span>
         </a>
 
-				<a
-					href="https://github.com/SiegeToaster/math_hw_formatter_website"
-					target="_blank"
-					rel="noopener noreferrer"
-				>
-					Source code on{' '}
-					<span className={styles.logo}>
-						<Image src="/github.svg" alt="Github Logo" width={108} height={24} />
-					</span>
-				</a>
+        <a
+          href="https://github.com/SiegeToaster/math_hw_formatter_website"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Source code on{' '}
+          <span className={styles.logo}>
+            <Image src="/github.svg" alt="Github Logo" width={108} height={24} />
+          </span>
+        </a>
       </footer>
     </div>
   )

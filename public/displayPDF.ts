@@ -5,8 +5,8 @@
 const urlParams = new URLSearchParams(window.location.search)
 const pdfString = urlParams.get("pdfString")
 if (pdfString) {
-	const iframe = document.getElementById("pdfViewer");
-	iframe?.setAttribute('src', pdfString)
+  const iframe = document.getElementById("pdfViewer");
+  iframe?.setAttribute('src', pdfString)
 }
 
 export {}

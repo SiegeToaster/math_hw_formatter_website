@@ -9,7 +9,7 @@ const Home: NextPage = () => {
       <Head>
         <title>IDK What I&apos;m Doing</title>
         <meta name="description" content="http://localhost:3000/" />
-        <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" href="/icon.ico" />
       </Head>
 
       <main className={styles.main}>
@@ -24,7 +24,7 @@ const Home: NextPage = () => {
         </h1>
 
         <p className={styles.description}>
-          It will be a miracle if this works.
+          How does it work? Well I&apos;ll tell you.<br></br><br></br>I don&apos;t know.
         </p>
 
         <div className={styles.grid}>
@@ -40,6 +40,10 @@ const Home: NextPage = () => {
             <p>Read Me</p>
           </a>
         </div>
+
+        <p className={styles.version}>
+          Version 1.0
+        </p>
 
 				<p className={styles.authors}>
           Created by:<br></br>William Armstrong and William Hayr

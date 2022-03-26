@@ -9,7 +9,7 @@ const Home: NextPage = () => {
       <Head>
         <title>IDK What I&apos;m Doing</title>
         <meta name="description" content="http://localhost:3000/" />
-        <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" href="/icon.ico" />
       </Head>
 
       <Script id='tempFix' >{`var exports = {};`}</Script> {/* ToDo: Find a not stupid fix */}

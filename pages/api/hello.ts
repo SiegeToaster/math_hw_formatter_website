@@ -44,13 +44,28 @@ export default async function handler(
   // respond with error if inputs are invalid
   if ([params, name, period, pages].includes('')) return res.status(400).json({ message: '400 - Invalid input(s)' })
 
+  hwNum = formatHwNum(hwNum)
 
   const assignmentData = await getAssignment(hwNum)
   if (!assignmentData) return res.status(500).json({ message: '500 - Failed to retrieve assignment data '})
   const pdf = await generatePDF(assignmentData.hwString, assignmentData.assignment, name, period, assignmentData.dueDate, parseInt(pages))
   // respond success with inputs
-  res.status(200).json({ pdf: pdf, needReviewProblems: true }) // ToDo: check for review problems
-  console.log('done')
+  res.status(200).json({ pdf: pdf, needReviewProblems: assignmentData.needReviewProblems }) // ToDo: check for review problems
+  // console.log('done')
+}
+
+function formatHwNum(hwNum: string) {
+  hwNum = hwNum.toLowerCase().trim()
+  if (hwNum.startsWith('hw')) {
+    hwNum = hwNum.slice(2).trim()
+  }
+  if (hwNum.includes('/')) {
+    hwNum = hwNum.split('/')[0]
+  } else if (hwNum.includes('-')) {
+    hwNum = hwNum.split('-')[0]
+  }
+
+  return hwNum
 }
 
 async function generatePDF(hwNum: string, assignment: string, name: string, period: string, date: string, numberOfPages: number) { // ! maximum 10 pages
@@ -71,7 +86,7 @@ async function generatePDF(hwNum: string, assignment: string, name: string, peri
   return pdf.output('dataurlstring', {filename: `HW${hwNum}`})
 }
 
-async function getAssignment(hwNum: string): Promise<{ hwString: string, assignment: string, dueDate: string } | undefined> {
+async function getAssignment(hwNum: string): Promise<{ hwString: string, assignment: string, dueDate: string, needReviewProblems: boolean } | undefined> {
   const authToken = googleAuth()
   if (!authToken) { return }
   
@@ -85,7 +100,7 @@ async function getAssignment(hwNum: string): Promise<{ hwString: string, assignm
   })
 
   const data = document.data.body?.content![4].table!.tableRows!
-  let hwString, assignedProblemsString, dueDate // returns
+  let hwString, assignedProblemsString, dueDate, needReviewProblems // returns
 
   for (let block of data) {
     const assignment = block.tableCells
@@ -104,12 +119,13 @@ async function getAssignment(hwNum: string): Promise<{ hwString: string, assignm
       const problems = getProblems(assignmentProblems)
       
       dueDate = problems.dueDate
+      needReviewProblems = problems.needReviewProblems
       let problemsText = problems.problems
       if (!Array.isArray(problemsText)) problemsText = [problemsText]
       assignedProblemsString = constructAssignedProblemsString(pages, problemsText)
       
       if (!hwString || !assignedProblemsString || !dueDate) return
-      return { hwString: hwString, assignment: assignedProblemsString, dueDate: dueDate}
+      return { hwString: hwString, assignment: assignedProblemsString, dueDate: dueDate, needReviewProblems: needReviewProblems }
     }
   }
 }
@@ -149,7 +165,7 @@ function constructValidNumbers(hwString: string) {
       validNumbers.push(hwString)
     }
   } else {
-    validNumbers.push(hwString)
+    validNumbers.push(hwString.toLowerCase())
   }
 
   return validNumbers
@@ -192,28 +208,33 @@ function getPages(assignmentPages: docs_v1.Schema$StructuralElement[]) {
   return pages
 }
 
-function getProblems(assignmentProblems: docs_v1.Schema$StructuralElement[]): { problems: string[], dueDate: string } {
+function getProblems(assignmentProblems: docs_v1.Schema$StructuralElement[]): { problems: string[], dueDate: string, needReviewProblems: boolean } {
+  let needReviewProblems = false
   let dueDate = ''
   const problems: string[] = []
 
   for (const problem of assignmentProblems) {
     const problem2 = problem.paragraph?.elements![0]!
-    if (!Object.keys(problem2).includes('textRun')) return { problems: problems, dueDate: dueDate }
+    if (!Object.keys(problem2).includes('textRun')) continue
 
     const problemText = problem2.textRun?.content
-    if (!problemText) continue
-    if (problemText?.match(/^do +mml/i)) return { problems: problems, dueDate: dueDate }
 
-    if (problemText?.toLowerCase().startsWith('due')) {
+    if (!problemText) continue
+    if (problemText?.match(/^do more/i)) return { problems: problems, dueDate: dueDate, needReviewProblems: needReviewProblems }
+
+    if (problemText.toLowerCase().startsWith('due')) {
       const index = problemText.search(/\d/)
       dueDate = problemText.slice(index).replaceAll('\n', '') + '/' + (new Date().getFullYear()).toString().slice(2)
       // The year thing won't work if the assignment is due in a different year than when it is being fetched, but I could've just left it at 2022 so I think it's okay, and since my opinion is the only one that matters here, it this 'bug' will remain :)
+    } else if (problemText.toLowerCase().includes("review") || problemText.toLowerCase().includes("test topics")) {
+      needReviewProblems = true
+      return { problems: problems, dueDate: dueDate, needReviewProblems: needReviewProblems }
     } else {
       problems.push(problemText.replaceAll('\n', ''))
     }
   }
   
-  return { problems: problems, dueDate: dueDate }
+  return { problems: problems, dueDate: dueDate, needReviewProblems: needReviewProblems }
 }
 
 function constructAssignedProblemsString(pages: string[], problems: string[]) {

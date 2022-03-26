@@ -14,8 +14,6 @@
 
 # production
 /build
-# don't feel like making a separate dir for compiled typescript, so in public it shall stay.
-/public/*.js
 
 # misc
 .DS_Store

@@ -121,11 +121,23 @@
   text-align: right;
 }
 
+.version {
+  position: absolute;
+	bottom: 1%;
+  left: 1%;
+  width: 10%;
+  text-align: left;
+}
+
 .link {
   color: blue;
 }
 .link:hover {
   text-decoration: underline;
+}
+
+.instructions {
+  max-width: 55%;
 }
 
 

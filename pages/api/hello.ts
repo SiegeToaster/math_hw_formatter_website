@@ -1,3 +1,33 @@
+/**
+ * String.prototype.replaceAll() polyfill
+ * https://gomakethings.com/how-to-replace-a-section-of-a-string-with-another-one-with-vanilla-js/
+ * @author Chris Ferdinandi
+ * @license MIT
+ */
+if (!String.prototype.replaceAll) {
+  // @ts-ignore
+String.prototype.replaceAll = function(str: string | RegExp, newStr: string){
+
+  // If a regex pattern
+  if (Object.prototype.toString.call(str).toLowerCase() === '[object regexp]') {
+    return this.replace(str, newStr);
+  }
+
+  // If a string
+  return this.replace(new RegExp(str, 'g'), newStr);
+
+};
+}
+
+
+if (!Array.prototype.at) {
+Array.prototype.at = function(index: number) : any {
+  return (index >= 0) ? 
+  this[index] : 
+  this[this.length + index]
+}
+}
+
 // http://localhost:3000/api/hello
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { auth, docs, docs_v1 } from '@googleapis/docs'

@@ -18,8 +18,6 @@ String.prototype.replaceAll = function(str: string | RegExp, newStr: string){
 
 };
 }
-
-
 if (!Array.prototype.at) {
 Array.prototype.at = function(index: number) : any {
   return (index >= 0) ? 
@@ -27,6 +25,7 @@ Array.prototype.at = function(index: number) : any {
   this[this.length + index]
 }
 }
+
 
 // http://localhost:3000/api/hello
 import type { NextApiRequest, NextApiResponse } from 'next'
@@ -255,12 +254,12 @@ function getProblems(assignmentProblems: docs_v1.Schema$StructuralElement[]): { 
     if (problemText.toLowerCase().startsWith('due')) {
       const index = problemText.search(/\d/)
       dueDate = problemText.slice(index).replaceAll('\n', '') + '/' + (new Date().getFullYear()).toString().slice(2)
-      // The year thing won't work if the assignment is due in a different year than when it is being fetched, but I could've just left it at 2022 so I think it's okay, and since my opinion is the only one that matters here, it this 'bug' will remain :)
+      // The year thing won't work if the assignment is due in a different year than when it is being fetched, but I could've just left it at 2022 so I think it's okay, and since my opinion is the only one that matters here, this 'bug' will remain :)
     } else if (problemText.toLowerCase().includes("review") || problemText.toLowerCase().includes("test topics")) {
       needReviewProblems = true
       return { problems: problems, dueDate: dueDate, needReviewProblems: needReviewProblems }
     } else {
-      problems.push(problemText.replaceAll('\n', ''))
+      if (dueDate !== '') problems.push(problemText.replaceAll('\n', ''))
     }
   }
   

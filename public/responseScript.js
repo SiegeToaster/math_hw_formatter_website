@@ -51,19 +51,28 @@ var urlParams = new URLSearchParams(window.location.search);
  * params[2] = hwNumber
  *
  * params[3] = pages
+ *
+ * params[4] = width
+ *
+ * params[5] = height
+ *
+ * params[6] = fontSize
  */
 var params = [];
 params[0] = urlParams.get("name");
 params[1] = urlParams.get("periodNumber");
 params[2] = urlParams.get("hwNumber");
 params[3] = urlParams.get("pages");
+params[4] = urlParams.get("width");
+params[5] = urlParams.get("height");
+params[6] = urlParams.get("fontSize");
 response();
 function response() {
     return __awaiter(this, void 0, void 0, function () {
         var APIResponse, pdf, para_1, button;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, fetch("./api/hello?name=".concat(params[0], "&periodNumber=").concat(params[1], "&hwNumber=").concat(params[2], "&pages=").concat(params[3])).then(function (res) {
+                case 0: return [4 /*yield*/, fetch("./api/hello?name=" + params[0] + "&periodNumber=" + params[1] + "&hwNumber=" + params[2] + "&pages=" + params[3] + "&width=" + params[4] + "&height=" + params[5] + "&fontSize=" + params[6]).then(function (res) {
                         return res.json();
                     })];
                 case 1:
@@ -71,7 +80,7 @@ function response() {
                     console.log(response);
                     if (APIResponse.message) {
                         console.log(APIResponse.message);
-                        updateText("Error: ".concat(APIResponse.message));
+                        updateText("Error: " + APIResponse.message);
                     }
                     else {
                         pdf = APIResponse.pdf;

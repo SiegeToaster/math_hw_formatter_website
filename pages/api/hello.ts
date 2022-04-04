@@ -50,6 +50,10 @@ export default async function handler(
   let period = params.periodNumber
   let hwNum = params.hwNumber
   let pages = params.pages
+  let pageHeight = params.height
+  let pageWidth = params.width
+  let fontSize = params.fontSize
+  let pageHeightNum, pageWidthNum, fontSizeNum
 
   if (Array.isArray(name)) {
     name = name.join()
@@ -61,11 +65,38 @@ export default async function handler(
     hwNum = hwNum.join()
   }
   if (Array.isArray(pages)) {
-    pages = pages.join() // sonarlint threw a warning when I did single line ifs with this 
+    pages = pages.join()
+  }
+  if (Array.isArray(pageHeight)) {
+    pageHeight = pageHeight.join()
+  }
+  if (Array.isArray(pageWidth)) {
+    pageWidth = pageWidth.join()
+  }
+  if (Array.isArray(fontSize)) {
+    fontSize = fontSize.join() // sonarlint threw a warning when I did single line ifs with this 
   }
 
   if (!params || !name || !period || !pages || !hwNum) {
     return res.status(400).json({ message: '400 - Missing input(s)' })
+  }
+
+  if (!pageHeight) {
+    pageHeightNum = 10.5
+  } else {
+    pageHeightNum = parseInt(pageHeight)
+  }
+
+  if (!pageWidth) {
+    pageWidthNum = 8
+  } else {
+    pageWidthNum = parseInt(pageWidth)
+  }
+
+  if (!fontSize) {
+    fontSizeNum = 14
+  } else {
+    fontSizeNum = parseInt(fontSize)
   }
 
   if (period.constructor === Array) period = period[0]
@@ -77,9 +108,9 @@ export default async function handler(
 
   const assignmentData = await getAssignment(hwNum)
   if (!assignmentData) return res.status(500).json({ message: '500 - Failed to retrieve assignment data '})
-  const pdf = await generatePDF(assignmentData.hwString, assignmentData.assignment, name, period, assignmentData.dueDate, parseInt(pages))
+  const pdf = await generatePDF(assignmentData.hwString, assignmentData.assignment, name, period, assignmentData.dueDate, parseInt(pages), pageHeightNum, pageWidthNum, fontSizeNum)
   // respond success with inputs
-  res.status(200).json({ pdf: pdf, needReviewProblems: assignmentData.needReviewProblems }) // ToDo: check for review problems
+  res.status(200).json({ pdf: pdf, needReviewProblems: assignmentData.needReviewProblems })
   // console.log('done')
 }
 
@@ -97,20 +128,21 @@ function formatHwNum(hwNum: string) {
   return hwNum
 }
 
-async function generatePDF(hwNum: string, assignment: string, name: string, period: string, date: string, numberOfPages: number) { // ! maximum 10 pages
-  const pdf = new jsPDF()
+async function generatePDF(hwNum: string, assignment: string, name: string, period: string, date: string, numberOfPages: number, pageHeight: number, pageWidth: number, fontSize: number) {
+  const pdf = new jsPDF("p", "in", [pageHeight, pageWidth])
+  
   pdf.setFont("helvetica")
-  pdf.setFontSize(14)
+  pdf.setFontSize(fontSize)
 
-  pdf.text(`HW ${hwNum}`, 35, 12, {maxWidth: 24})
-  pdf.text(assignment, 63, 12, {maxWidth: 93})
-  pdf.text([name, `Per ${period}`, date], 161, 12, {maxWidth: 55})
+  pdf.text(`HW ${hwNum}`, 1, 0.3, { maxWidth: 1 })
+  pdf.text(assignment, 2.05, 0.3, { maxWidth: pageWidth - 4.2 })
+  pdf.text([name, `Per ${period}`, date], pageWidth - 2.05, 0.3, { maxWidth: 2 })
 
-  for (let i = 1; i < numberOfPages; i++) {
+  for (let i = 1; i < numberOfPages; i++) { // ! maximum 10 pages
     pdf.addPage() // i *think* addPage has to be at the beginning of the loop, hence the duplicate code above
-    pdf.text(`HW ${hwNum}`, 35, 12, {maxWidth: 24})
-    pdf.text(assignment, 63, 12, {maxWidth: 93})
-    pdf.text([name, `Per ${period}`, date], 161, 12, {maxWidth: 55})
+    pdf.text(`HW ${hwNum}`, 1, 0.3, { maxWidth: 1 })
+    pdf.text(assignment, 2.05, 0.3, { maxWidth: pageWidth - 4.2 })
+    pdf.text([name, `Per ${period}`, date], pageWidth - 2.1, 0.3, { maxWidth: 2 })
   }
   return pdf.output('dataurlstring', {filename: `HW${hwNum}`})
 }

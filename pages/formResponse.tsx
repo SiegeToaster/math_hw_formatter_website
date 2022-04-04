@@ -23,7 +23,7 @@ const Home: NextPage = () => {
           <p id="testThing" className={styles.description}>Please Wait...</p>
         </div>
 
-        <button id="okayButton" className={styles.hiddenButton} >Okay.</button>
+        <button id="okayButton" className={styles.hidden} >Okay.</button>
       </main>
     </div>
   )

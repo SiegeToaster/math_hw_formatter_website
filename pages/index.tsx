@@ -42,7 +42,7 @@ const Home: NextPage = () => {
         </div>
 
         <p className={styles.version}>
-          Version 1.0
+          Version 1.2
         </p>
 
 				<p className={styles.authors}>

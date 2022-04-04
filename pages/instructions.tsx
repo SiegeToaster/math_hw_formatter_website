@@ -21,6 +21,7 @@ const Home: NextPage = () => {
           Lost? Confused? So am I.<br></br>Welcome to the instructions page.
         </p>
 
+        <h3>Basic Instructions</h3>
         <p className={styles.instructions}>
           Step 1: go to the <a href="./formInput" className={styles.link} >input page</a>.
           <br></br>
@@ -35,10 +36,23 @@ const Home: NextPage = () => {
             assignments google doc
           </a> to see what is needed.  The same is true for added problems.
           <br></br>
-          Step 4: Press the print button in the top right.  Ctrl + P will not work.
+          Step 4: Press the print button in the top right.  <b>Ctrl/Cmd + P will not work.</b>
         </p>
-        <p><br></br>Here&apos;s an example</p>
-        <Image src="/instructionsExample.webp" alt="" width="532" height="343"></Image>
+        <p>Here&apos;s an example</p>
+        <Image src="/instructionsExample.webp" alt="Basic Instructions Example" width="399" height="257"></Image>
+
+        <h3>Advanced Settings</h3>
+        <p className={styles.instructions}>
+          Step 1: Complete Basic Instructions
+          <br></br>
+          Step 2: Click &quot;Show Advanced Options&quot;
+          <br></br>
+          Step 3: Input approximate page width in inches in the form labeled &quot;Page Width (in.).&quot; Anything less than 5 inches will likely not work.  I am not sure what decimal place it is accurate to, but anything more than hundredths is too insignificant to matter anyways. (Default is 8 in.)
+          <br></br>
+          Step 4: Repeat step 4 but for page height. (Default is 10.5 in.)
+          <br></br>
+          Step 5: Input font size in the form labeled &quot;Font Size&quot; in points.  The font type is helvetica if you want to do some wacky point to inches conversion.  This may need to be altered if your name does not fit in the alloted 2 inches.  (Default is 14 pt.)
+        </p>
       </main>
     </div>
   )

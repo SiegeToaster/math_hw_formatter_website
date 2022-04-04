@@ -14,6 +14,12 @@ const urlParams = new URLSearchParams(window.location.search)
  * params[2] = hwNumber
  * 
  * params[3] = pages
+ * 
+ * params[4] = width
+ * 
+ * params[5] = height
+ * 
+ * params[6] = fontSize
  */
 const params: string[] | null[] = []
 
@@ -21,13 +27,16 @@ params[0] = urlParams.get("name")
 params[1] = urlParams.get("periodNumber")
 params[2] = urlParams.get("hwNumber")
 params[3] = urlParams.get("pages")
+params[4] = urlParams.get("width")
+params[5] = urlParams.get("height")
+params[6] = urlParams.get("fontSize")
 
 response()
 
 export {}
 
 async function response() {
-  const APIResponse = await fetch(`./api/hello?name=${params[0]}&periodNumber=${params[1]}&hwNumber=${params[2]}&pages=${params[3]}`).then(res => {
+  const APIResponse = await fetch(`./api/hello?name=${params[0]}&periodNumber=${params[1]}&hwNumber=${params[2]}&pages=${params[3]}&width=${params[4]}&height=${params[5]}&fontSize=${params[6]}`).then(res => {
     return res.json()
   })
   console.log(response)
